@@ -1,1 +1,1 @@
-game owned by @dysonlittle
+game owned by [@dysonlittle](github.com/dysonlittle)
