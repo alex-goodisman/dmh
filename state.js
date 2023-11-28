@@ -67,6 +67,20 @@ class State {
         this.deck = this.discard;
         this.discard = [];
     }
+    winCheck() {
+        const allPlayers = Object.keys(this.hands);
+        if (allPlayers.length === 1) {
+            this.turnPhase = 'over';
+            this.turnPlayers = [allPlayers[0]];
+            this.hands[allPlayers[0]] = this.hands[allPlayers[0]].map(({card}) => ({card, visible: true}));
+            return true;
+        } else if (allPlayers.length === 0) {
+            this.turnPhase = 'over';
+            this.turnPlayers = [];
+            return true;
+        }
+        return false;
+    }
     addPlayer(name) {
         if (this.playerOrder.length !== 0) {
             throw 'cannot add player, game has started';
@@ -103,6 +117,9 @@ class State {
         if (this.replaceHearts.includes(name)) {
             this.replaceHearts.splice(this.replaceHearts.indexOf(name), 1);
         }
+        if (this.winCheck()) {
+            return
+        }
         if (this.playerOrder[this.activePlayer] === name) {
             this.doEndTurn();
             return;
@@ -121,16 +138,6 @@ class State {
             this.goToNextHands();
             break;
         }
-        const allPlayers = Object.keys(this.hands);
-        if (allPlayers.length === 1) {
-            console.log('player wins', allPlayers[0]);
-            this.turnPhase = 'over';
-            this.turnPlayers = [allPlayers[0]];
-        } else if (allPlayers.length === 0) {
-            console.log('everybody loses');
-            this.turnPhase = 'over';
-            this.turnPlayers = [];
-        }
     }
     startGame() {
         if (this.playerOrder.length !== 0) {
@@ -142,6 +149,7 @@ class State {
         // starting player is random since there's no dealer.
         this.activePlayer = Math.floor(Math.random() * this.playerOrder.length);
         this.turnPhase = 'action';
+        this.winCheck();
     }
     getAllPlayersList(includeActive) {
         // produce a list of all players, starting with activeplayer and continuing around until it reaches them again
@@ -279,17 +287,10 @@ class State {
             }
         }
         // if we got here, then every life that needs to be lost has been lost.
-        const allPlayers = Object.keys(this.hands);
-        if (allPlayers.length === 1) {
-            console.log('player wins', allPlayers[0]);
-            this.turnPhase = 'over';
-            this.turnPlayers = [allPlayers[0]];
-        } else if (allPlayers.length === 0) {
-            console.log('everybody loses');
-            this.turnPhase = 'over';
-            this.turnPlayers = [];
-            // TODO figure out how to respond to an 'over' state
-        } else if (this.playersToReplace.length > 0) {
+        if (this.winCheck()) {
+            return;
+        }
+        if (this.playersToReplace.length > 0) {
             // there should usually be at least one replacer after the losing is done.
             // in that case, we start replacement process.
             this.turnPhase = 'replace';

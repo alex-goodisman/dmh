@@ -2,9 +2,11 @@
 <!DOCTYPE html>
 <html>
 	<head>
+		<link rel="stylesheet" href="main.css">
 		<script src="client.js"></script>
 	</head>
 	<body>
+		<!-- information section -->
 		<div id=deck></div>
 		<div id=discard></div>
 		<div id=players></div>
@@ -13,12 +15,23 @@
 		<div id=subSubMessage></div>
 		<div id=hearts></div>
 		<div id=hands></div>
-		<input id=name oninput="nameChanged();"></body>
+		<br/>
+		<!-- game starting panel -->
+		<input id=name oninput="nameChanged();" onkeydown="inputKeyPressed(event);"></input>
 		<button id=join onclick="joinGame();" disabled title="Name cannot be empty">Join Game</button>
+		<br/>
 		<button id=start onclick="startGame();" style="display:none;">Start Game</button>
 		<br/>
+		<!-- game action buttons -->
+		<button id=reveal onclick="handsStart();" style="display:none;" disabled>All Hands on Deck!</button>
+		<button id=toss onclick="tossStart();" style="display:none;" disabled>Toss</button>
+		<button id=shoot onclick="shootStart();" style="display:none;" disabled>Shoot</button>
+		<button id=fight onclick="callFight();" style="display:none;" disabled>Swordfight</button>
+		<button id=cancel onclick="cancel();" style="display:none;" disable>Cancel</button>
+		<br/>
+		<!-- leave game panel -->
 		<br/>
 		<button id=leave onclick="leaveGame();" style="display:none;">Leave Game</button>
-		<!-- TODO build action & card buttons -->
+		<!-- TODO build card buttons -->
 	</body>
 </html>

@@ -1,0 +1,29 @@
+/* put this class on the shoot target button so it looks like normal text when its disabled */
+.target_button:disabled {
+  background-color: transparent;
+  border: 0px;
+  padding: 0px;
+  color: initial;
+  font-family: initial;
+  font-size: initial;
+}
+
+/* same thing but for the card buttons */
+.card_button:disabled {
+  background-color: transparent;
+  border: 0px;
+  padding: 0px;
+  color: initial;
+}
+
+/* card buttons don't render suits properly in the default font even when they are enabled*/
+.card_button {
+  font-family: initial;
+  font-size: initial;
+}
+
+/* fake toggle button, make them blue when enabled */
+.card_button.selected {
+  color: blue;
+  border: none;
+}

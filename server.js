@@ -6,6 +6,7 @@ const static = {
 	'index.html': null,
 	'client.js': null,
 	'favicon.ico': null,
+	'main.css': null,
 };
 Object.keys(static).forEach(file => {
 	static[file] = fs.readFileSync(path.join(__dirname, file));
@@ -14,8 +15,8 @@ static[''] = static['index.html'];
 
 const newState = require('./state');
 
-const state = newState();
-const playerMap = {};
+let state = newState();
+let playerMap = {};
 
 const server = http.createServer((r, s) => {
     let body = '';
@@ -34,6 +35,10 @@ const server = http.createServer((r, s) => {
 		}
 		switch (path) {
 		case 'join':
+			if (state.turnPhase === 'over') {
+				state = newState();
+				playerMap = {};
+			}
 			try {
 				state.addPlayer(body);
 				let id;
@@ -106,7 +111,6 @@ const server = http.createServer((r, s) => {
 					throw 'player not in game';
 				}
 				state.doAction(playerMap[player], params);
-				s.write(JSON.stringify(state.getState(player)));
 				s.end();
 			} catch (err) {
 				s.writeHead(400);
