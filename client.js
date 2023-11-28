@@ -529,3 +529,11 @@ function stopTimer() {
 
 // auto start the timer when we load the script.
 startTimer();
+
+async function reset() {
+	alert('invoking hard reset, remove this from the final version');
+	await fetch(window.location.origin + '/reset', {
+		method: 'POST',
+		body: '',
+	});
+}

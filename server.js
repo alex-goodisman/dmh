@@ -34,6 +34,11 @@ const server = http.createServer((r, s) => {
 			return;
 		}
 		switch (path) {
+		case 'reset':
+			console.log('hard reset invoked. remove this from the final version');
+			state = newState();
+			playerMap = {};
+			break;
 		case 'join':
 			if (state.turnPhase === 'over') {
 				state = newState();
