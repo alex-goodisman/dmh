@@ -77,42 +77,71 @@ class State {
         if (name in this.hands) {
             throw 'cannot add player, already exists';
         }
+        if (name === '') {
+            throw 'cannot add player, name is blank';
+        }
         this.shuffle();
         this.hands[name] = this.deck.splice(0,4).map(card => ({card, visible: false}));
     }
     removePlayer(name) {
-        if (this.playerOrder.length !== 0) {
-            throw 'cannot remove player, game has started';
-        }
         if (!(name in this.hands)) {
             throw 'cannot remove player, not in game';
         }
         // discard player's anchor and lives
         this.hands[name].forEach(({card}) => this.discard.push(card));
         delete this.hands[name];
+        if (this.playerOrder.length === 0) {
+            this.shuffle();
+            return;
+        }
+        if (this.turnPlayers.includes(name)) {
+            this.turnPlayers.splice(this.turnPlayers.indexOf(name), 1);
+        }
+        if (this.playersToReplace.includes(name)) {
+            this.playersToReplace.splice(this.playersToReplace.indexOf(name), 1);
+        }
+        if (this.replaceHearts.includes(name)) {
+            this.replaceHearts.splice(this.replaceHearts.indexOf(name), 1);
+        }
+        if (this.playerOrder[this.activePlayer] === name) {
+            this.doEndTurn();
+            return;
+        }
+        switch(this.turnPhase) {
+        case 'lose':
+            this.goToNextLoseLife();
+            break;
+        case 'replace':
+            this.goToNextReplace();
+            break;
+        case 'toss':
+            this.goToNextToss();
+            break;
+        case 'hands':
+            this.goToNextHands();
+            break;
+        }
+        const allPlayers = Object.keys(this.hands);
+        if (allPlayers.length === 1) {
+            console.log('player wins', allPlayers[0]);
+            this.turnPhase = 'over';
+            this.turnPlayers = [allPlayers[0]];
+        } else if (allPlayers.length === 0) {
+            console.log('everybody loses');
+            this.turnPhase = 'over';
+            this.turnPlayers = [];
+        }
     }
     startGame() {
+        if (this.playerOrder.length !== 0) {
+            throw 'game already started';
+        }
         this.shuffle();
         this.discard = this.deck.splice(0,4);
         this.playerOrder = Object.keys(this.hands);
         // starting player is random since there's no dealer.
         this.activePlayer = Math.floor(Math.random() * this.playerOrder.length);
         this.turnPhase = 'action';
-        // turnphases: action, hands, toss, shot, fight_start, fight_end, treasure, heart
-        // FSM:
-        // Action node: player chooses hands, toss, shot, or fight. 
-            // hands (and provides card to turn): go to Hands node for next player
-            // toss (and provides card to toss): go to Toss node for next player
-            // shot (and provides player to shoot): go to Shot node for targeted player
-            // fight: go to fight_start node
-        // Hands node: described player provides card to turn.
-            // if next player is active player (who started hands) then:
-                // if deck is empty go to treasure for active player
-                // otherwise go to action for next player and transition active player
-            // otherwise go to hands for next player
-        // toss node: identical to hands, but go to toss for next player
-        // shot node: targeted player provides cards to exchange
-            // 
     }
     getAllPlayersList(includeActive) {
         // produce a list of all players, starting with activeplayer and continuing around until it reaches them again
@@ -176,7 +205,7 @@ class State {
             const cardsInSuit = this.hands[player].filter(({card}) => card.s === suit);
             // if singleton, record it in case we need in later
             if (cardsInSuit.length === 1) {
-                playerSingletons[player] = cardsInSuit[0].n;
+                playerSingletons[player] = cardsInSuit[0].card.n;
             }
             // compute that player's total
             const suitSum = cardsInSuit.map(({card}) => card.n === 'a' ? 11 : typeof card.n === 'string' ? 10 : card.n).reduce((a,b) => a+b, 0);
@@ -254,9 +283,12 @@ class State {
         if (allPlayers.length === 1) {
             console.log('player wins', allPlayers[0]);
             this.turnPhase = 'over';
+            this.turnPlayers = [allPlayers[0]];
         } else if (allPlayers.length === 0) {
             console.log('everybody loses');
             this.turnPhase = 'over';
+            this.turnPlayers = [];
+            // TODO figure out how to respond to an 'over' state
         } else if (this.playersToReplace.length > 0) {
             // there should usually be at least one replacer after the losing is done.
             // in that case, we start replacement process.
@@ -443,6 +475,9 @@ class State {
             this.turnPlayers = [];
         } else {
             // deck emptied, so treasure challenge!
+            Object.keys(this.hands).forEach(player => {
+                this.hands[player] = this.hands[player].map(({card, visible}) => ({card, visible: true}));
+            });
             const minDiamondPlayers = this.maxOrMinPlayers('d', true);
             // lifeloss is guaranteed here: someone must have minimum.
             // so we can go directly to life loss phase here
@@ -455,15 +490,8 @@ class State {
             this.goToNextLoseLife();
         }
     }
-    doAction(str) {
-        let body = {};
-        try {
-            body = JSON.parse(str);
-        } catch (err) {
-            console.log(err);
-            throw 'cannot do action, JSON parse failure';
-        }
-        const {action, player, index, target, indices} = body; // some of these may be undefined for some actions
+    doAction(player, params) {
+        const {action, index, target, indices} = params; // some of these may be undefined for some actions
         switch(action) {
             case 'call_hands': // call for all hands on deck, as an action
                 if (this.turnPhase !== 'action') {
@@ -541,7 +569,7 @@ class State {
                 };
                 this.turnPhase = 'toss';
                 this.turnPlayers = this.getAllPlayersList(false);
-                this.goToNextToss(player);
+                this.goToNextToss();
                 break;
             case 'continue_toss': // someone already called toss and you're providing your card
                 if (this.turnPhase !== 'toss') {
@@ -561,7 +589,8 @@ class State {
                     card: this.deck.shift(),
                     visible: false
                 };
-                this.goToNextToss(player);
+                this.turnPlayers.shift();
+                this.goToNextToss();
                 break;
             case 'call_shoot':
                 if (this.turnPhase !== 'action') {
@@ -657,7 +686,7 @@ class State {
                 const heartRequired = this.replaceHearts.includes(player);
                 // are conditions satisfied?
                 const includedAnchor = indices.includes(0);
-                const includedHeart = indices.some(idx => this.hands[player][idx].s === 'h');
+                const includedHeart = indices.some(idx => this.hands[player][idx].card.s === 'h');
 
                 // absurdly specific corner case handling
                 if(this.deck.length < 2 && this.hands[player].length === 2 && visibleAnchor && heartRequired && this.hands[player][0].card.s !== 'h') {
@@ -702,6 +731,9 @@ class State {
                 if (Object.keys(this.hands).length <= 2) {
                     throw 'cannot call fight with 2 players remaining';
                 }
+                Object.keys(this.hands).forEach(player => {
+                    this.hands[player] = this.hands[player].map(({card, visible}) => ({card, visible: true}));
+                });
 
                 const maxSpadePlayers = this.maxOrMinPlayers('s', false);
                 const minSpadePlayers = this.maxOrMinPlayers('s', true);
@@ -721,9 +753,6 @@ class State {
         }
     }
     getState(player) {
-        if (!(player in this.hands)) {
-            throw 'cannot get state, player not in game';
-        }
         const state = {
             playerOrder: this.playerOrder,
             activePlayer: this.activePlayer,

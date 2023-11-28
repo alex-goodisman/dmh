@@ -1,0 +1,24 @@
+
+<!DOCTYPE html>
+<html>
+	<head>
+		<script src="client.js"></script>
+	</head>
+	<body>
+		<div id=deck></div>
+		<div id=discard></div>
+		<div id=players></div>
+		<div id=phase></div>
+		<div id=subMessage></div>
+		<div id=subSubMessage></div>
+		<div id=hearts></div>
+		<div id=hands></div>
+		<input id=name oninput="nameChanged();"></body>
+		<button id=join onclick="joinGame();" disabled title="Name cannot be empty">Join Game</button>
+		<button id=start onclick="startGame();" style="display:none;">Start Game</button>
+		<br/>
+		<br/>
+		<button id=leave onclick="leaveGame();" style="display:none;">Leave Game</button>
+		<!-- TODO build action & card buttons -->
+	</body>
+</html>
