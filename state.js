@@ -15,6 +15,13 @@ function printCard({n, s}) {
     return `${n === 't' ? 10 : `${n}`.toUpperCase()}&#${symbols[s]};`;
 }
 
+function formatAmt(amt) {
+    if (amt === 't') {
+        amt = 10;
+    }
+    return amt.toString().toUpperCase();
+}
+
 class State {
     constructor() {
         // cards in the deck
@@ -289,7 +296,7 @@ class State {
                 if (floatResult) {
                     // skip losing life but go on the blocked list to replace a heart later
                     this.replaceHearts.push(this.turnPlayers[0]);
-                    this.log.push(`${this.turnPlayers[0]} blocked losing a life (${floatAmt.toString().toUpperCase()}&#${symbols.h}; floats against ${heartFloat.toString().toUpperCase()}&#${symbols.h};)!`);
+                    this.log.push(`${this.turnPlayers[0]} blocked losing a life (${formatAmt(floatAmt)}&#${symbols.h}; floats against ${formatAmt(heartFloat)}&#${symbols.h};)!`);
                     this.turnPlayers.shift();
                     continue;
                 }
@@ -524,7 +531,7 @@ class State {
                 this.hands[player] = this.hands[player].map(({card, visible}) => ({card, visible: true}));
             });
             const {val: minDiamond, players: minDiamondPlayers} = this.maxOrMinPlayers('d', true);
-            this.log.push(`Players ${minDiamondPlayers.join(', ')} failed the treasure challenge (minimum ${minDiamond.toString().toUpperCase()}&#${symbols.d};).`);
+            this.log.push(`Players ${minDiamondPlayers.join(', ')} failed the treasure challenge (minimum ${formatAmt(minDiamond)}&#${symbols.d};).`);
             // lifeloss is guaranteed here: someone must have minimum.
             // so we can go directly to life loss phase here
             this.turnPhase = 'lose';
@@ -667,20 +674,20 @@ class State {
                 const clubFloat = this.getFloatTarget('c');
                 const {val: targetFloatAmt, float: targetFloatResult} = this.playerFloats(target, 'c', clubFloat) 
                 if (targetFloatResult) {
-                    this.log.push(`${target} survives (${targetFloatAmt.toString().toUpperCase()}&#${symbols.c}; floats against ${clubFloat.toString().toUpperCase()}&#${symbols.c};)!`);
+                    this.log.push(`${target} survives (${formatAmt(targetFloatAmt)}&#${symbols.c}; floats against ${formatAmt(clubFloat)}&#${symbols.c};)!`);
                     // if they do, turn the shooter everything faceup also.
                     this.hands[player] = this.hands[player].map(({card}) => ({card, visible: true}));
                     this.log.push(`${target} retaliated against ${player}.`);
                     const {val: playerFloatAmt, float: playerFloatResult} = this.playerFloats(player, 'c', clubFloat)
                     if (playerFloatResult) {
-                        this.log.push(`${player} survives (${playerFloatAmt.toString().toUpperCase()}&#${symbols.c}; floats against ${clubFloat.toString().toUpperCase()}&#${symbols.c};)!`);
+                        this.log.push(`${player} survives (${formatAmt(playerFloatAmt)}&#${symbols.c}; floats against ${formatAmt(clubFloat)}&#${symbols.c};)!`);
                         // both floated, so no lives lost
                         // BOTH can now replace stuff, but victim first.
                         this.turnPhase = 'replace';
                         this.turnPlayers = [target, player];
                         this.goToNextReplace();
                     } else {
-                        this.log.push(`${player} did not survive (${playerFloatAmt.toString().toUpperCase()}&#${symbols.c}; sinks against ${clubFloat.toString().toUpperCase()}&#${symbols.c}).`);
+                        this.log.push(`${player} did not survive (${formatAmt(playerFloatAmt)}&#${symbols.c}; sinks against ${formatAmt(clubFloat)}&#${symbols.c}).`);
                         // target floated but shooter sank. shooter loses life, 
                         // then BOTH will replace will replace, but victim first.
                         this.turnPhase = 'lose';
@@ -690,7 +697,7 @@ class State {
                         this.goToNextLoseLife();
                     }
                 } else {
-                    this.log.push(`${target} did not survive (${targetFloatAmt.toString().toUpperCase()}&#${symbols.c}; sinks against ${clubFloat.toString().toUpperCase()}&#${symbols.c}).`);
+                    this.log.push(`${target} did not survive (${formatAmt(targetFloatAmt)}&#${symbols.c}; sinks against ${formatAmt(clubFloat)}&#${symbols.c}).`);
                     // target sank. they lose life, then they can replace
                     this.turnPhase = 'lose';
                     this.turnPlayers = [target];
@@ -810,7 +817,7 @@ class State {
                 const {val: minSpade, players: minSpadePlayers} = this.maxOrMinPlayers('s', true);
                 const allPlayers = this.getAllPlayersList(true); // start at active player and go around, including active.
                 const lostPlayers = allPlayers.filter(player => maxSpadePlayers.includes(player) || minSpadePlayers.includes(player));
-                this.log.push(`Players ${lostPlayers.join(', ')} lost the swordfight (minimum ${minSpade.toString().toUpperCase()}&#${symbols.s};, maximum ${maxSpade.toString().toUpperCase()}&#${symbols.s};).`);
+                this.log.push(`Players ${lostPlayers.join(', ')} lost the swordfight (minimum ${formatAmt(minSpade)}&#${symbols.s};, maximum ${formatAmt(maxSpade)}&#${symbols.s};).`);
 
                 // lifeloss is guaranteed here: someone must have max and someone must have minimum.
                 // so we can go directly to life loss phase here
