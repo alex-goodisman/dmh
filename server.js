@@ -62,6 +62,9 @@ const server = http.createServer((r, s) => {
 				s.write(id);
 				s.end();
 			} catch (err) {
+				if (err instanceof Error) {
+					console.log(err);
+				}
 				s.writeHead(400);
 				s.write(err);
 				s.end();
@@ -78,6 +81,9 @@ const server = http.createServer((r, s) => {
 				delete playerTimers[body];
 				s.end();
 			} catch (err) {
+				if (err instanceof Error) {
+					console.log(err);
+				}
 				s.writeHead(400);
 				s.write(err);
 				s.end();
@@ -91,6 +97,9 @@ const server = http.createServer((r, s) => {
 				state.startGame();
 				s.end();
 			} catch(err) {
+				if (err instanceof Error) {
+					console.log(err);
+				}
 				s.writeHead(400);
 				s.write(err);
 				s.end();
@@ -110,6 +119,9 @@ const server = http.createServer((r, s) => {
 				s.write(JSON.stringify(st));
 				s.end();
 			} catch (err) {
+				if (err instanceof Error) {
+					console.log(err);
+				}
 				console.log(err);
 				s.writeHead(400);
 				s.write(err);
@@ -137,6 +149,9 @@ const server = http.createServer((r, s) => {
 				state.doAction(playerMap[player], params);
 				s.end();
 			} catch (err) {
+				if (err instanceof Error) {
+					console.log(err);
+				}
 				s.writeHead(400);
 				s.write(err);
 				s.end();

@@ -261,7 +261,7 @@ async function getState() {
 
 	// store state and destructure
 	state = await res.json();
-	const {deckSize, discard, playerOrder, activePlayer, turnPhase, turnPlayers, playersToReplace, replaceHearts, lossBlockable, hands} = state;
+	const {deckSize, discard, playerOrder, activePlayer, turnPhase, turnPlayers, playersToReplace, replaceHearts, lossBlockable, hands, log} = state;
 
 	// first thing after getting the server reply is fixup the client state if it doesnt match the server somehow.
 	// clientstates are states where the UI needs to change in response to a user action without changing the game state.
@@ -494,8 +494,20 @@ async function getState() {
 		submit.title = cantSubmitReason
 		submit.disabled = cantSubmitReason !== '';
 	}
+
+	document.getElementById('log').innerHTML = log.join('<br/>');
+
 	// just in case
 	nameChanged();
+}
+
+function toggleLog() {
+	const log = document.getElementById('log');
+	if (log.style.display !== 'none') {
+		log.style.display = 'none';
+	} else {
+		log.style.display = 'inline-block';
+	}
 }
 
 // timer management. currently fetches state every 1s

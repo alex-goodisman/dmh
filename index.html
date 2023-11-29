@@ -1,11 +1,20 @@
 
 <!DOCTYPE html>
-<html>
+<html style="height:100%;">
 	<head>
 		<link rel="stylesheet" href="main.css">
 		<script src="client.js"></script>
 	</head>
-	<body>
+	<body style="height:100%;">
+		<div style="float:right;height:100%">
+			<button style="float:right" onclick="toggleLog();">
+				|||
+			</button>
+			<br/>
+			<br/>
+			<div id=log style="border:1px solid;overflow-y:scroll;height:50%;text-align:right;padding-right:10px">
+			</div>
+		</div>
 		<!-- information section -->
 		<div id=deck></div>
 		<div id=discard></div>
