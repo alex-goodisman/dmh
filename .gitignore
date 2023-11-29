@@ -1,2 +1,2 @@
-server-key.pem
-server-cert.pem
+private.key
+certificate.crt

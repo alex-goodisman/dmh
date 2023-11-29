@@ -21,8 +21,8 @@ let playerMap = {};
 let playerTimers = {};
 
 const server = https.createServer({
-	key: fs.readFileSync(path.join(__dirname, 'server-key.pem')),
-	cert: fs.readFileSync(path.join(__dirname, 'server-cert.pem')),
+	key: fs.readFileSync(path.join(__dirname, 'private.key')),
+	cert: fs.readFileSync(path.join(__dirname, 'certificate.crt')),
 }, (r, s) => {
     let body = '';
    	r.on('data', (chunk) => {
