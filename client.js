@@ -11,6 +11,10 @@ let joinDisabled = true;
 // client-internal state for the selection of card replacements
 let selection = [];
 
+// hardcode the server so we can serve the client page from anywhere i.e. github pages
+// to use the server that served you the page, set this to `window.location.origin` in the browser console
+let server = 'http://157.230.52.255:8000';
+
 // unicode escapes for suits and the card symbol
 const symbols = {
 	c: 9827,
@@ -64,7 +68,7 @@ async function inputKeyPressed(evt) {
 // onclick handler for join button
 async function joinGame() {
 	const name = document.getElementById('name');
-	const res = await fetch(window.location.origin + '/join', {
+	const res = await fetch(server + '/join', {
 		method: 'POST',
 		body: name.value,
 	});
@@ -80,7 +84,7 @@ async function joinGame() {
 
 // onclick handler for leave button
 async function leaveGame() {
-	const res = await fetch(window.location.origin + '/leave', {
+	const res = await fetch(server + '/leave', {
 		method: 'POST',
 		body: myId,
 	});
@@ -96,7 +100,7 @@ async function leaveGame() {
 
 // onclick handler for start game button
 async function startGame() {
-	const res = await fetch(window.location.origin + '/start', {
+	const res = await fetch(server + '/start', {
 		method: 'POST',
 		body: myId,
 	});
@@ -129,7 +133,7 @@ async function cardConfirm(index) {
 	switch(state.turnPhase) {
 	case 'action':
 		if (clientState === 'toss' || clientState === 'hands') {
-			const res = await fetch(window.location.origin + '/game', {
+			const res = await fetch(server + '/game', {
 				method: 'POST',
 				body: JSON.stringify({
 					player: myId,
@@ -149,7 +153,7 @@ async function cardConfirm(index) {
 	case 'toss':
 	case 'lose':
 		if (state.turnPlayers[0] === myName) {
-			const res = await fetch(window.location.origin + '/game', {
+			const res = await fetch(server + '/game', {
 				method: 'POST',
 				body: JSON.stringify({
 					player: myId,
@@ -177,7 +181,7 @@ async function cardConfirm(index) {
 
 
 async function replaceConfirm() {
-	const res = await fetch(window.location.origin + '/game', {
+	const res = await fetch(server + '/game', {
 		method: 'POST',
 		body: JSON.stringify({
 			player: myId,
@@ -204,7 +208,7 @@ async function shootStart() {
 // onclick handler for the target buttons.
 // now we have the target we can send to the server
 async function shootConfirm(target) {
-	const res = await fetch(window.location.origin + '/game', {
+	const res = await fetch(server + '/game', {
 		method: 'POST',
 		body: JSON.stringify({
 			player: myId,
@@ -225,7 +229,7 @@ async function shootConfirm(target) {
 // onclick handler for the swordfight button
 // swordfight has no parameters so it calls instantly to the server
 async function callFight() {
-	const res = await fetch(window.location.origin + '/game', {
+	const res = await fetch(server + '/game', {
 		method: 'POST',
 		body: JSON.stringify({
 			player: myId,
@@ -250,7 +254,7 @@ async function cancel() {
 
 // called by the timer and whenever we do anything. refetch the whole game state from the server. it's small
 async function getState() {
-	const res = await fetch(window.location.origin + '/state', {
+	const res = await fetch(server + '/state', {
 		method: 'POST',
 		body: myId,
 	});
