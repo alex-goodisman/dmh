@@ -1,4 +1,4 @@
-const http = require('http');
+const https = require('https');
 const path = require('path');
 const fs = require('fs');
 
@@ -19,7 +19,10 @@ let state = newState();
 let playerMap = {};
 let playerTimers = {};
 
-const server = http.createServer((r, s) => {
+const server = https.createServer({
+	key: fs.readFileSync(path.join(__dirname, 'server-key.pem')),
+	cert: fs.readFileSync(path.join(__dirname, 'server-cert.pem')),
+}, (r, s) => {
     let body = '';
    	r.on('data', (chunk) => {
 		body += chunk;
