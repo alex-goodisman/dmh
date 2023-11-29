@@ -109,16 +109,6 @@ async function startGame() {
 
 }
 
-// we want to leave the game when you leave the page.
-// beforeunload is a hacky way to do this, we should do it with heartbeats instead.
-// but for now, if you go to leave the page, we automatically leave the game (even if you stay on the page oops)
-function beforeUnloadHandler(event) {
-	leaveGame();
-	event.preventDefault();
-
-	event.returnValue = true;
-}
-
 //onclick handler for the ahod button. need to confirm cards so its UI state only
 async function handsStart() {
 	clientState = 'hands';
@@ -292,12 +282,6 @@ async function getState() {
 	document.getElementById('join').style.display = ((myName in hands) && turnPhase !== 'over') ? 'none' : 'inline';
 	document.getElementById('leave').style.display = (myName in hands) ? 'inline' : 'none';
 	document.getElementById('start').style.display = ((myName in hands) && playerOrder.length === 0) ? 'inline' : 'none';
-	// detach the beforeunload handler unless you're in the game, to bother users less
-	if (myName in hands) {
-		window.addEventListener('beforeunload', beforeUnloadHandler);
-	}  else {
-		window.removeEventListener('beforeunload', beforeUnloadHandler);
-	}
 
 	// show action buttons if the game is underway, even if it's not your turn. clientstate also has to be base (not picking parameters).
 	document.getElementById('reveal').style.display = ((myName in hands) && playerOrder.length !== 0 && clientState === '' && turnPhase !== 'over') ? 'inline' : 'none';
@@ -529,11 +513,3 @@ function stopTimer() {
 
 // auto start the timer when we load the script.
 startTimer();
-
-async function reset() {
-	alert('invoking hard reset, remove this from the final version');
-	await fetch(window.location.origin + '/reset', {
-		method: 'POST',
-		body: '',
-	});
-}

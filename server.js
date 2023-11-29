@@ -17,6 +17,7 @@ const newState = require('./state');
 
 let state = newState();
 let playerMap = {};
+let playerTimers = {};
 
 const server = http.createServer((r, s) => {
     let body = '';
@@ -34,15 +35,14 @@ const server = http.createServer((r, s) => {
 			return;
 		}
 		switch (path) {
-		case 'reset':
-			console.log('hard reset invoked. remove this from the final version');
-			state = newState();
-			playerMap = {};
-			break;
 		case 'join':
 			if (state.turnPhase === 'over') {
 				state = newState();
 				playerMap = {};
+				Object.keys(playerTimers).forEach(id => {
+					clearTimeout(playerTimers[id]);
+				});
+				playerTimers = {};
 			}
 			try {
 				state.addPlayer(body);
@@ -52,6 +52,13 @@ const server = http.createServer((r, s) => {
 					id = Math.random().toString().slice(2);
 				} while (id in playerMap);
 				playerMap[id] = body;
+				playerTimers[id] = setTimeout(() => {
+					if (id in playerMap) {
+						state.removePlayer(playerMap[id]);
+						delete playerMap[id];
+						delete playerTimers[id];
+					}
+				}, 10000);
 				s.write(id);
 				s.end();
 			} catch (err) {
@@ -66,6 +73,9 @@ const server = http.createServer((r, s) => {
 					throw 'player not in game';
 				}
 				state.removePlayer(playerMap[body]);
+				delete playerMap[body];
+				clearTimeout(playerTimers[body]);
+				delete playerTimers[body];
 				s.end();
 			} catch (err) {
 				s.writeHead(400);
@@ -88,10 +98,19 @@ const server = http.createServer((r, s) => {
 			break;
 		case 'state':
 			try {
+				clearTimeout(playerTimers[body]);
+				playerTimers[body] = setTimeout(() => {
+					if (body in playerMap) {
+						state.removePlayer(playerMap[body]);
+						delete playerMap[body];
+						delete playerTimers[body];
+					}
+				}, 10000);
 				const st = state.getState(playerMap[body]);
 				s.write(JSON.stringify(st));
 				s.end();
 			} catch (err) {
+				console.log(err);
 				s.writeHead(400);
 				s.write(err);
 				s.end();
