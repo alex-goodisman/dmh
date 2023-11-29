@@ -10,10 +10,13 @@ let clientState = '';
 let joinDisabled = true;
 // client-internal state for the selection of card replacements
 let selection = [];
+// I had to do some HTTPS hackery involving self signed certs to get this to work with github pages. This counter quasi-detects the unsigned cert error so we can show a redirect
+let failureCounter = 0;
+
 
 // hardcode the server so we can serve the client page from anywhere i.e. github pages
 // to use the server that served you the page, set this to `window.location.origin` in the browser console
-let server = 'https://157.230.52.255:8000';
+let server = window.location.origin;//'https://157.230.52.255:8000';
 
 // unicode escapes for suits and the card symbol
 const symbols = {
@@ -254,17 +257,31 @@ async function cancel() {
 
 // called by the timer and whenever we do anything. refetch the whole game state from the server. it's small
 async function getState() {
-	const res = await fetch(server + '/state', {
-		method: 'POST',
-		body: myId,
-	});
-	if (res.status !== 200) {
-		alert(await res.text());
+	try {
+		const res = await fetch(server + '/state', {
+			method: 'POST',
+			body: myId,
+		});
+		if (res.status !== 200) {
+			alert(await res.text());
+			return;
+		}
+
+		// store state and destructure
+		state = await res.json();
+	} catch (err) {
+		console.log(err);
+		failureCounter++;
+		// use a failure counter so that a single network request failure doesn't trip it
+		if (failureCounter >= 3) {
+			document.getElementById('name').style.display = 'none';
+			document.getElementById('join').style.display = 'none';
+			document.getElementById('link').href = server + `/return?source=${encodeURIComponent(window.location.origin)}`;
+			document.getElementById('network').style.display = 'inline';
+		}
 		return;
 	}
-
-	// store state and destructure
-	state = await res.json();
+	failureCounter = 0;
 	const {deckSize, discard, playerOrder, activePlayer, turnPhase, turnPlayers, playersToReplace, replaceHearts, lossBlockable, hands, log} = state;
 
 	// first thing after getting the server reply is fixup the client state if it doesnt match the server somehow.

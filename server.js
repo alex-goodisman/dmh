@@ -1,6 +1,7 @@
 const https = require('https');
 const path = require('path');
 const fs = require('fs');
+const qs = require('querystring');
 
 const static = {
 	'index.html': null,
@@ -38,6 +39,16 @@ const server = https.createServer({
 			return;
 		}
 		s.setHeader('Access-Control-Allow-Origin', '*');
+		if (path.startsWith('return?')) {
+			const query = qs.parse(path.slice(path.indexOf('?') + 1));
+			if (query.source) {
+				s.writeHead(302, {
+					'Location': decodeURIComponent(query.source),
+				});
+				s.end();
+				return;
+			}
+		}
 		switch (path) {
 		case 'join':
 			if (state.turnPhase === 'over') {
