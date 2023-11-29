@@ -34,6 +34,7 @@ const server = http.createServer((r, s) => {
 			s.end();
 			return;
 		}
+		s.setHeader('Access-Control-Allow-Origin', '*');
 		switch (path) {
 		case 'join':
 			if (state.turnPhase === 'over') {
