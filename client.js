@@ -276,7 +276,7 @@ async function getState() {
 		if (failureCounter >= 3) {
 			document.getElementById('name').style.display = 'none';
 			document.getElementById('join').style.display = 'none';
-			document.getElementById('link').href = server + `/return?source=${encodeURIComponent(window.location.origin)}`;
+			document.getElementById('link').href = server + `/return?source=${encodeURIComponent(window.location.href)}`;
 			document.getElementById('network').style.display = 'inline';
 		}
 		return;
