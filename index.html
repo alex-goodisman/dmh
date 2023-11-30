@@ -5,8 +5,8 @@
 		<link rel="stylesheet" href="main.css">
 		<script src="client.js"></script>
 	</head>
-	<body style="height:100%;">
-		<div style="float:right;height:100%">
+	<body style="height:90%;">
+		<div style="float:right;height:90%">
 			<button style="float:right" onclick="toggleLog();">
 				|||
 			</button>
@@ -15,17 +15,42 @@
 			<div id=log style="border:1px solid;overflow-y:scroll;height:50%;text-align:right;padding-right:10px">
 			</div>
 		</div>
+		<div style="height:15%;position:absolute;bottom:0;">
+			<button id=ruleButton style="bottom:0;" onclick="toggleRules();">|||</button><br/>
+			<div id=rules style="border:1px solid;height:75%;overflow-y:scroll;padding-right:10px">
+				The rules can be found <a href="https://docs.google.com/document/d/1C10sneRPjDw_QY2-CFY_WwzCh4Ad0SAMB9DCRtJd_Os">here</a>.<br/>
+				This online version will automatically play out turns when they are forced.<br/>
+				That is, if you only have one option, the game will take it without prompting you.<br/>
+				However, it will never start your turn for you. It will always require at least one input from the active player each turn.<br/>
+				The log on the right side of the screen should show every game action, which can help reconstruct complicated turns.<br/>
+				Some edge cases are not outlined in the rules. Their implementation is described below:
+				<ul>
+					<li>If you have to replace both an anchor and a heart, but the deck has only one card, you can pick either but you must pick one.</li>
+					<li>A ten alone will not beat a face card, but a sum of two or more cards that adds to 10 will.</li>
+					<li>Face card comparison rules only apply to totals of exactly 10. In any other situation, all face cards are worth the same 10.</li>
+					<li>Face card comparison rules only apply if every player involved in the comparison has a single card. If anyone has a sum, all are tied.</li>
+					<li>If a player blocks losing a life, but a treasure challenge is triggered, they will still have to replace at least one heart after the treasure challenge, regardless of the outcome.</li>
+					<li>If a player calls Shoot, but their target survives, then regardless of the further outcome, both players will replace their cards, starting with the target.</li>
+				</ul>
+				If you're the game creator and you want me to change the implementation, or take this down, please reach out.
+			</div>
+		</div>
 		<!-- Warning for network errors -->
 		<div id=network style="display:none;">
 			THIS IS NOT AN ERROR!<br/>
 			If you are seeing this, you can't reach the game server.<br/>
-			Most likely, this is because you need to trust the server's certificate.<br/>
-			The game server is uncertified because I don't have a certificate authority. <br/>
+			<br/>
+			The server should have its own certificate now so probably what happened is it expired.<br/>
+			Contact me and I'll put in a new one.<br/>
+			<br/>
+			In the meantime, you can manually trust it.<br/>
 			It's running on digital ocean so if you trust me and/or them you can trust the game server. <br/>
 			<br/>
 			You are going to see a security warning page. You need to click through it (under "Advanced" in some browsers) <br/>
 			and then click to continue on to the site. <br/>
-			Click <a id=link>this link</a> to go trust the game server, and accept the warning.
+			Click <a id=link>this link</a> to go trust the game server, and accept the warning.<br/>
+			<br/>
+			If you are still seeing this message after doing that you might just be disconnected from the internet.
 		</div>
 		<!-- information section -->
 		<div id=deck></div>

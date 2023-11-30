@@ -531,6 +531,18 @@ function toggleLog() {
 	}
 }
 
+function toggleRules() {
+	const rules = document.getElementById('rules');
+	const ruleButton = document.getElementById('ruleButton');
+	if (rules.style.display !== 'none') {
+		rules.style.display = 'none';
+		ruleButton.style.position = 'absolute';
+	} else {
+		rules.style.display = 'inline-block';
+		ruleButton.style.position = 'relative';
+	}
+}
+
 // timer management. currently fetches state every 1s
 let stateTimer = null;
 
