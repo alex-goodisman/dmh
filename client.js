@@ -300,6 +300,7 @@ async function getState() {
 	document.getElementById('start').style.display = ((myName in hands) && playerOrder.length === 0) ? 'inline' : 'none';
 
 	// show action buttons if the game is underway, even if it's not your turn. clientstate also has to be base (not picking parameters).
+	document.getElementById('handholder').style.display = ((myName in hands)) ? 'inline-block' : 'none';
 	document.getElementById('reveal').style.display = ((myName in hands) && playerOrder.length !== 0 && clientState === '' && turnPhase !== 'over') ? 'inline' : 'none';
 	document.getElementById('toss').style.display = ((myName in hands) && playerOrder.length !== 0 && clientState === '' && turnPhase !== 'over') ? 'inline' : 'none';
 	document.getElementById('shoot').style.display = ((myName in hands) && playerOrder.length !== 0 && clientState === '' && turnPhase !== 'over') ? 'inline' : 'none';
@@ -360,8 +361,36 @@ async function getState() {
 	// anyone's faceup cards will be bolded.
 	// player names in the hands section are buttons so you can click on them to shoot them, but css turns off the button style.
 	// your own cards are also buttons.
-	document.getElementById('hands').innerHTML = Object.keys(hands).map(player => `<tr><td><button id=shoot_${player} class=target_button disabled onclick=\"shootConfirm('${player}');\">${player}</button>:</td>${hands[player].map((info, idx) => player === myName ? `<td style="padding:0;"><button id=hand_${idx} style="height:100%;display:block;" class=card_button disabled onclick=\"cardConfirm(${idx});\"><div style="width:50px;height:70px;background-image:url(cards/back.png);background-size:50px 70px;display:block;">${printCardInHand(info)}</div></button></td>` : `<td style="max-width:50px;height:70px;padding:0;">${printCardInHand(info)}</td>`).join('')}</td>${player === myName ? '<td><button id=submit style="display:none;" disabled onclick=\"replaceConfirm();\">Submit</button></td>' : ''}</tr>`).join('');
-
+	document.getElementById('hands').innerHTML = Object.keys(hands).filter(player => player !== myName).map(player => 
+		`<div style="box-shadow: black 0px 0px 2px 2px;padding: 10px;display: inline-block;text-align: center;">
+				<button id=shoot_${player} class=target_button disabled onclick=\"shootConfirm('${player}');\">${player}</button>:
+			<br/>
+			${hands[player].map((info, idx) => 
+				`<div style="max-width:50px;height:70px;padding:0;display:inline-block">
+						${printCardInHand(info)}
+				</div>`
+				).join('')
+			}
+		</div>`
+	).join('<br/><br/>');
+	document.getElementById('myhands').innerHTML = Object.keys(hands).filter(player => player === myName).map(player => 
+			`
+					${player}:<br/>
+				${hands[player].map((info, idx) => 
+						`
+							<button id=hand_${idx} style="height:100%;" class=card_button disabled onclick=\"cardConfirm(${idx});\">
+								<div style="width:50px;height:70px;background-image:url(cards/back.png);background-size:50px 70px;display:block;">
+									${printCardInHand(info)}
+								</div>
+							</button>
+						`
+					).join('')
+				}
+					<button id=submit style="display:none;" disabled onclick=\"replaceConfirm();\">
+						Submit
+					</button>
+			`
+		).join('');
 	// there are potentially 4 messages we need to include to describe the game state. these are:
 	// 1 turn phase and applicable player (may or may not be active player, which is why they gets its own display in the player order section)
 	// 2 subsequent players for the same phase

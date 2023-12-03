@@ -28,11 +28,11 @@
 }
 
 /* when hovering over one of your own cards, show the card image */
-td:hover button.card_button img {
+button.card_button:hover img {
   display:block;
 }
 
 /* otherwise, if you aren't hovering, then hide the image to show the cardback on the button background */
-td:not(:hover) button.card_button img {
+button.card_button:not(:hover) img {
   display:none;
 }

@@ -62,7 +62,7 @@
 		<div id=subMessage></div>
 		<div id=subSubMessage></div>
 		<div id=hearts></div>
-		<table><tbody id=hands></tbody></table>
+		<div id=hands></div>
 		<br/>
 		<!-- game starting panel -->
 		<input id=name oninput="nameChanged();" onkeydown="inputKeyPressed(event);"></input>
@@ -71,11 +71,16 @@
 		<button id=start onclick="startGame();" style="display:none;">Start Game</button>
 		<br/>
 		<!-- game action buttons -->
-		<button id=reveal onclick="handsStart();" style="display:none;" disabled>All Hands on Deck!</button>
-		<button id=toss onclick="tossStart();" style="display:none;" disabled>Toss</button>
-		<button id=shoot onclick="shootStart();" style="display:none;" disabled>Shoot</button>
-		<button id=fight onclick="callFight();" style="display:none;" disabled>Swordfight</button>
-		<button id=cancel onclick="cancel();" style="display:none;" disable>Cancel</button>
+		<div style="width:100%;text-align:center;">
+			<div id="handholder" style="display:inline-block;padding:10px;box-shadow:0px 0px 2px 2px black;">
+				<button id=reveal onclick="handsStart();" style="display:none;" disabled>All Hands on Deck!</button>
+				<button id=toss onclick="tossStart();" style="display:none;" disabled>Toss</button>
+				<button id=shoot onclick="shootStart();" style="display:none;" disabled>Shoot</button>
+				<button id=fight onclick="callFight();" style="display:none;" disabled>Swordfight</button>
+				<button id=cancel onclick="cancel();" style="display:none;" disable>Cancel</button>
+				<div id=myhands></div>
+			</div>
+		</div>
 		<br/>
 		<!-- leave game panel -->
 		<br/>
