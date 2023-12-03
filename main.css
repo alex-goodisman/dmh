@@ -8,22 +8,31 @@
   font-size: initial;
 }
 
-/* same thing but for the card buttons */
+/* put this class on the card buttons so when they are disabled they still take up the same space but are invisible */
 .card_button:disabled {
-  background-color: transparent;
-  border: 0px;
-  padding: 0px;
-  color: initial;
+  background-color:transparent;
+  border-color:transparent;
 }
 
-/* card buttons don't render suits properly in the default font even when they are enabled*/
-.card_button {
-  font-family: initial;
-  font-size: initial;
-}
-
-/* fake toggle button, make them blue when enabled */
+/* fake toggle button, make them look "pressed" when toggled on*/
 .card_button.selected {
-  color: blue;
-  border: none;
+  border: inset;
+}
+/* fake toggle button, make use the same style _while_ pressing the button */
+.card_button:active {
+  border:inset;
+}
+/* fake toggle button, use the opposite "unpressed" style the rest of the time */
+.card_button {
+  border:outset;
+}
+
+/* when hovering over one of your own cards, show the card image */
+td:hover button.card_button img {
+  display:block;
+}
+
+/* otherwise, if you aren't hovering, then hide the image to show the cardback on the button background */
+td:not(:hover) button.card_button img {
+  display:none;
 }

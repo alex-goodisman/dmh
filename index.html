@@ -6,6 +6,7 @@
 		<script src="client.js"></script>
 	</head>
 	<body style="height:90%;">
+		<!-- right side log panel -->
 		<div style="float:right;height:90%">
 			<button style="float:right" onclick="toggleLog();">
 				|||
@@ -15,6 +16,7 @@
 			<div id=log style="border:1px solid;overflow-y:scroll;height:50%;text-align:right;padding-right:10px">
 			</div>
 		</div>
+		<!-- bottom rules panel -->
 		<div style="height:15%;position:absolute;bottom:0;">
 			<button id=ruleButton style="bottom:0;" onclick="toggleRules();">|||</button><br/>
 			<div id=rules style="border:1px solid;height:75%;overflow-y:scroll;padding-right:10px">
@@ -35,7 +37,7 @@
 				If you're the game creator and you want me to change the implementation, or take this down, please reach out.
 			</div>
 		</div>
-		<!-- Warning for network errors -->
+		<!-- Warning for https / network errors -->
 		<div id=network style="display:none;">
 			THIS IS NOT AN ERROR!<br/>
 			If you are seeing this, you can't reach the game server.<br/>
@@ -54,13 +56,13 @@
 		</div>
 		<!-- information section -->
 		<div id=deck></div>
-		<div id=discard></div>
+		<div>Discard: <span id="discard" style="display:inline-block;overflow-x:auto;white-space:nowrap;max-width:50%"></div>
 		<div id=players></div>
 		<div id=phase></div>
 		<div id=subMessage></div>
 		<div id=subSubMessage></div>
 		<div id=hearts></div>
-		<div id=hands></div>
+		<table><tbody id=hands></tbody></table>
 		<br/>
 		<!-- game starting panel -->
 		<input id=name oninput="nameChanged();" onkeydown="inputKeyPressed(event);"></input>

@@ -3,6 +3,8 @@ const path = require('path');
 const fs = require('fs');
 const qs = require('querystring');
 
+const cardImages = Object.fromEntries(['back', ...['c', 'd', 'h', 's'].flatMap(s => [...Array(10).keys(), 't', 'j', 'q', 'k', 'a'].slice(2).map(n => n + s))].map(k => [`${k}.png`, fs.readFileSync(path.join(__dirname, `cards/${k}.png`))]));
+
 const static = {
 	'index.html': null,
 	'client.js': null,
@@ -37,6 +39,15 @@ const server = https.createServer({
 			s.write(static[path]);
 			s.end();
 			return;
+		}
+		if (path.startsWith('cards/')) {
+			const img = cardImages[path.substring(6)];
+			if (img != null) {
+				s.writeHead(200, {'Content-Type': 'image/png'});
+				s.write(img);
+				s.end();
+				return;
+			}
 		}
 		s.setHeader('Access-Control-Allow-Origin', '*');
 		if (path.startsWith('return?')) {

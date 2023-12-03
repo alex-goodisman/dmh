@@ -27,14 +27,9 @@ const symbols = {
 	deck: 9646,
 }
 
-// convenience method to render card data as unicode
-function printCard({n, s}) {
-	return `${n === 't' ? 10 : `${n}`.toUpperCase()}&#${symbols[s]};`;
-}
-
 // convenience method to render card & visibliity data
 function printCardInHand({card, visible}) {
-	return 'n' in card ? visible ? `<b>${printCard(card)}</b>` : `<i>(${printCard(card)})</i>` : `&#${symbols.deck};`;
+	return 'n' in card ? visible ? `<img src="cards/${card.n}${card.s}.png" style="height:100%;display:block;margin:auto"/>` : `<img src="cards/${card.n}${card.s}.png" style="height:100%;margin:auto"/>` : '<img src="cards/back.png" style="height:100%;display:block;margin:auto"/>';
 }
 
 // event handler for typing into the name field. should disable the join button if the name's invalid
@@ -365,7 +360,7 @@ async function getState() {
 	// anyone's faceup cards will be bolded.
 	// player names in the hands section are buttons so you can click on them to shoot them, but css turns off the button style.
 	// your own cards are also buttons.
-	document.getElementById('hands').innerHTML = Object.keys(hands).map(player => `<button id=shoot_${player} class=target_button disabled onclick=\"shootConfirm('${player}');\">${player}</button>: [${hands[player].map((info, idx) => player === myName ? `<button id=hand_${idx} class=card_button disabled onclick=\"cardConfirm(${idx});\">${printCardInHand(info)}</button>` : printCardInHand(info)).join(', ')}]${player === myName ? '<button id=submit style="display:none;" disabled onclick=\"replaceConfirm();\">Submit</button>' : ''}`).join('<br/>');
+	document.getElementById('hands').innerHTML = Object.keys(hands).map(player => `<tr><td><button id=shoot_${player} class=target_button disabled onclick=\"shootConfirm('${player}');\">${player}</button>:</td>${hands[player].map((info, idx) => player === myName ? `<td style="padding:0;"><button id=hand_${idx} style="height:100%;display:block;" class=card_button disabled onclick=\"cardConfirm(${idx});\"><div style="width:50px;height:70px;background-image:url(cards/back.png);background-size:50px 70px;display:block;">${printCardInHand(info)}</div></button></td>` : `<td style="max-width:50px;height:70px;padding:0;">${printCardInHand(info)}</td>`).join('')}</td>${player === myName ? '<td><button id=submit style="display:none;" disabled onclick=\"replaceConfirm();\">Submit</button></td>' : ''}</tr>`).join('');
 
 	// there are potentially 4 messages we need to include to describe the game state. these are:
 	// 1 turn phase and applicable player (may or may not be active player, which is why they gets its own display in the player order section)
@@ -415,9 +410,9 @@ async function getState() {
 	}
 
 	// show deck (server only tells you the count, no peeking :D)
-	document.getElementById('deck').innerHTML = `Deck: &#${symbols.deck};x${deckSize}`;
+	document.getElementById('deck').innerHTML = `Deck: <img src="cards/back.png" style="width:50px;"/> x${deckSize}`;
 	// whole discard pile is publically visible.
-	document.getElementById('discard').innerHTML = `Discard: [${discard.map(printCard).join(', ')}]`;
+	document.getElementById('discard').innerHTML = discard.map(card => `<img src="cards/${card.n}${card.s}.png" style="width:50px;"/>`).join('');
 	// show messages
 	document.getElementById('phase').innerHTML = phaseMessage;
 	document.getElementById('subMessage').innerHTML = subMessage;
