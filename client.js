@@ -371,18 +371,46 @@ async function getState() {
 	// for players not in the game, this is just every playe rin turn order.
 	const tableOrder = startIdx === -1 ? playerList : [...playerList.slice(startIdx + 1), ...playerList.slice(0, startIdx)];
 	// build the display for each of them, keep in an array so we can arrange them in a sec
-	const tableElements = tableOrder.map(player =>
-		`<button id=shoot_${player} class=target_button disabled onclick=\"shootConfirm('${player}');\" style="box-shadow: ${(activePlayer >= 0 && playerOrder[activePlayer] === player) ? 'orange' : 'black'} 0px 0px 2px 2px;padding: 10px;display: inline-block;text-align: center;">
-				${player}:
-			<br/>
-			${(hands[player] || []).map(info =>
-				`<div style="max-width:50px;height:70px;padding:0;display:inline-block">
-						${printCardInHand(info)}
-				</div>`
-				).join('')
-			}
-		</button>`
-	);
+	const tableElements = tableOrder.map(player => {
+		const shootButton = document.createElement('button');
+		shootButton.id = `shoot_${player}`;
+		shootButton.className = 'target_button';
+		shootButton.disabled = true;
+		shootButton.onclick = () => shootConfirm(player);
+		Object.assign(shootButton.style, {
+			'box-shadow': `${(activePlayer >= 0 && playerOrder[activePlayer] === player) ? 'orange' : 'black'} 0px 0px 2px 2px`,
+			'padding': '10px',
+			'display': 'inline-block',
+			'text-align': 'center',
+		});
+
+		shootButton.appendChild(document.createTextNode(`${player}:`));
+		shootButton.appendChild(document.createElement('br'));
+
+		(hands[player] || []).forEach(info => {
+			const cardDisplay = document.createElement('div');			
+			Object.assign(cardDisplay.style, {
+				'max-width': '50px',
+				'height': '70px',
+				'padding': '0',
+				'display': 'inline-block',
+			});
+
+
+			const cardImage = document.createElement('img');
+			Object.assign(cardImage.style, {
+				'height': '100%',
+				'display': 'block',
+				'margin': 'auto',
+			});
+			cardImage.src = info.visible ? `cards/${info.card.n}${info.card.s}.png` : 'cards/back.png';
+
+			cardDisplay.appendChild(cardImage);
+			shootButton.appendChild(cardDisplay);
+		});
+
+		return shootButton;
+	});
 
 
 	// split the list so half are on the left going up, and half are on the right going down. if odd one out, put it on the left
@@ -391,11 +419,11 @@ async function getState() {
 	const rightElements = tableElements.slice(Math.ceil(tableElements.length / 2));
 	// if there are 0 total elements, add an empty one on the left for spacing
 	if (leftElements.length === 0) {
-		leftElements.push('');
+		leftElements.push(document.createTextNode(''));
 	}
 	// then if there's a mismatch, add one on the right too.
 	if (rightElements.length < leftElements.length) {
-		rightElements.push('');
+		rightElements.push(document.createTextNode(''));
 	}
 
 
@@ -404,35 +432,77 @@ async function getState() {
 	Array.from(handsPane.children).filter((_, idx) => idx >= leftElements.length).map(child => child.remove());
 	// then create new rows in case we had too few.
 	while(handsPane.children.length < leftElements.length) {
+		const cellStyle = {
+			'white-space': 'nowrap',
+			'padding-bottom': '10px',
+			'width': '25%',
+		};
+		const leftCell = document.createElement('td');
+		Object.assign(leftCell.style, cellStyle);
+		const rightCell = document.createElement('td');
+		Object.assign(rightCell.style, cellStyle);
+
 		const row = document.createElement('tr');
-		row.innerHTML = '<td style="white-space:nowrap;padding-bottom:10px;width:25%;"></td><td style="white-space:nowrap;padding-bottom:10px;width:25%;"></td>';
+		row.appendChild(leftCell);
+		row.appendChild(rightCell);
+
 		handsPane.appendChild(row);
 	}
 	// now populate the interior of each cell
 	Array.from(handsPane.children).forEach((child, idx) => {
-		child.children[0].innerHTML = leftElements[idx];
+		child.children[0].replaceChildren(leftElements[idx]);
 		// make room for the center pane in the first row.
-		child.children[idx === 0 ? 2 : 1].innerHTML = rightElements[idx];
+		child.children[idx === 0 ? 2 : 1].replaceChildren(rightElements[idx]);
 	})
 
-	document.getElementById('myhands').innerHTML = Object.keys(hands).filter(player => player === myName).map(player => 
-			`
-					${player}:<br/>
-				${hands[player].map((info, idx) => 
-						`
-							<button id=hand_${idx} style="height:100%;" class=card_button disabled onclick=\"cardConfirm(${idx});\">
-								<div style="width:50px;height:70px;background-image:url(cards/back.png);background-size:50px 70px;display:block;">
-									${printCardInHand(info)}
-								</div>
-							</button>
-						`
-					).join('')
-				}
-					<button id=submit style="display:none;" disabled onclick=\"replaceConfirm();\">
-						Submit
-					</button>
-			`
-		).join('');
+
+	if (myName in hands) {
+		const myCardButtons = (hands[myName] || []).map((info, idx) => {
+			const cardButton = document.createElement('button');
+			cardButton.id = `hand_${idx}`;
+			cardButton.style.height = '100%';
+			cardButton.className = 'card_button';
+			cardButton.disabled = true;
+			cardButton.onclick = () => cardConfirm(idx);
+
+			const cardDiv = document.createElement('div');
+			Object.assign(cardDiv.style, {
+				'width': '50px',
+				'height': '70px',
+				'background-image': 'url(cards/back.png)',
+				'background-size': '50px 70px',
+				'display': 'block',
+			});
+
+			//<img src="cards/${card.n}${card.s}.png" style="height:100%;display:block;margin:auto"/>
+			//<img src="cards/${card.n}${card.s}.png" style="height:100%;margin:auto"/>
+			const cardImage = document.createElement('img');
+			cardImage.src = `cards/${info.card.n}${info.card.s}.png`;
+			Object.assign(cardImage.style, {
+				'height': '100%',
+				'margin': 'auto',
+			});
+			if (info.visible) {
+				cardImage.style.display = 'block';
+				// actual visibility is done via the hover selectors in the real css
+			}
+
+			cardDiv.appendChild(cardImage);
+			cardButton.appendChild(cardDiv);
+			return cardButton;
+		});
+		const submitButton = document.createElement('button');
+		submitButton.id = 'submit';
+		submitButton.style.display = 'none';
+		submitButton.disabled = true;
+		submitButton.onclick = replaceConfirm;
+		submitButton.appendChild(document.createTextNode('Submit'));
+
+		document.getElementById('myhands').replaceChildren(document.createTextNode(`${myName}:`), document.createElement('br'), ...myCardButtons, submitButton);
+	} else {
+		document.getElementById('myhands').replaceChildren();
+	}
+
 	// there are potentially 4 messages we need to include to describe the game state. these are:
 	// 1 turn phase and applicable player (may or may not be active player, which is why they gets its own display in the player order section)
 	// 2 subsequent players for the same phase
@@ -440,8 +510,8 @@ async function getState() {
 	// 4 if anyone floated hearts this turn and hasnt yet replaced their cards, list them separately so they/others know they will have to replace a heart
 
 	// messages are different based on which phase it is, and whether the player in question is you.
-	let phaseMessage = '&nbsp;';
-	let subMessage = '&nbsp;';
+	let phaseMessage = '.';
+	let subMessage = '.';
 	switch(turnPhase) {
 	case 'action':
 		phaseMessage = playerOrder[activePlayer] === myName ? 'Choose an action...' : `${playerOrder[activePlayer]} is choosing an action...`;
@@ -481,14 +551,19 @@ async function getState() {
 	}
 
 	// show deck (server only tells you the count, no peeking :D)
-	document.getElementById('deck').innerHTML = `x${deckSize}`;
+	document.getElementById('deck').childNodes[0].nodeValue = `x${deckSize}`;
 	// whole discard pile is publically visible.
-	document.getElementById('discard').innerHTML = discard.map(card => `<img src="cards/${card.n}${card.s}.png" style="width:50px;"/>`).join('');
+	document.getElementById('discard').replaceChildren(...discard.map(card => {
+		const img = document.createElement('img');
+		img.style.width = '50px';
+		img.src = `cards/${card.n}${card.s}.png`;
+		return img;
+	}));
 	// show messages
-	document.getElementById('phase').innerHTML = phaseMessage;
-	document.getElementById('subMessage').innerHTML = subMessage;
-	document.getElementById('subSubMessage').innerHTML = playersToReplace.length === 0 ? '&nbsp;' : `Then ${playersToReplace.join(', ')} will replace their cards`;
-	document.getElementById('hearts').innerHTML = replaceHearts.length === 0 ? '&nbsp' : `${replaceHearts.join(', ')} floated hearts, and will need to replace a heart`;
+	document.getElementById('phase').childNodes[0].nodeValue = phaseMessage;
+	document.getElementById('subMessage').childNodes[0].nodeValue = subMessage;
+	document.getElementById('subSubMessage').childNodes[0].nodeValue = playersToReplace.length === 0 ? '.' : `Then ${playersToReplace.join(', ')} will replace their cards`;
+	document.getElementById('hearts').childNodes[0].nodeValue = replaceHearts.length === 0 ? '.' : `${replaceHearts.join(', ')} floated hearts, and will need to replace a heart`;
 	
 	// buttons stuff
 
@@ -571,7 +646,7 @@ async function getState() {
 			cantSubmitReason = 'Someone else has to replace first';
 		} else if (dontForceBoth & !hasAnchor && !hasHeart) {
 			cantSubmitReason = 'Cannot satisfy both heart and anchor requirement, but must satisfy at least one';
-		} else if (forceAnchor && !dontForceBoth && !hasAnchor) {
+		} else if (forceAnchor && !dontForceBoth && !hasAnchor) { 
 			cantSubmitReason = 'Must include visible anchor';
 		} else if (replaceHearts.includes(myName) && !dontForceBoth && !hasHeart) {
 			cantSubmitReason = 'Must include a heart';
@@ -583,7 +658,7 @@ async function getState() {
 		submit.disabled = cantSubmitReason !== '';
 	}
 
-	document.getElementById('log').innerHTML = log.join('<br/>');
+	document.getElementById('log').replaceChildren(...log.flatMap(logLine => [document.createTextNode(logLine), document.createElement('br')]));
 
 	// just in case
 	nameChanged();
