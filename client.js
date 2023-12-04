@@ -361,18 +361,60 @@ async function getState() {
 	// anyone's faceup cards will be bolded.
 	// player names in the hands section are buttons so you can click on them to shoot them, but css turns off the button style.
 	// your own cards are also buttons.
-	document.getElementById('hands').innerHTML = Object.keys(hands).filter(player => player !== myName).map(player => 
+
+
+	// playerOrder might not exist yet, so fallback to the list of hands in that case
+	const playerList = playerOrder.length === 0 ? Object.keys(hands) : playerOrder;
+	// get list of all players, starting with yourself.
+	const startIdx = playerList.indexOf(myName);
+	// for players in the game, this is every player but you, in the order they will take turns after you will, until it comes back around.
+	// for players not in the game, this is just every playe rin turn order.
+	const tableOrder = startIdx === -1 ? playerList : [...playerList.slice(startIdx + 1), ...playerList.slice(0, startIdx)];
+	// build the display for each of them, keep in an array so we can arrange them in a sec
+	const tableElements = tableOrder.map(player =>
 		`<div style="box-shadow: black 0px 0px 2px 2px;padding: 10px;display: inline-block;text-align: center;">
 				<button id=shoot_${player} class=target_button disabled onclick=\"shootConfirm('${player}');\">${player}</button>:
 			<br/>
-			${hands[player].map((info, idx) => 
+			${(hands[player] || []).map((info, idx) =>
 				`<div style="max-width:50px;height:70px;padding:0;display:inline-block">
 						${printCardInHand(info)}
 				</div>`
 				).join('')
 			}
 		</div>`
-	).join('<br/><br/>');
+	);
+
+
+	// split the list so half are on the left going up, and half are on the right going down. if odd one out, put it on the left
+	// these are listed going down, so the left one is backwards
+	const leftElements = tableElements.slice(0, Math.ceil(tableElements.length / 2)).reverse();
+	const rightElements = tableElements.slice(Math.ceil(tableElements.length / 2));
+	// if there are 0 total elements, add an empty one on the left for spacing
+	if (leftElements.length === 0) {
+		leftElements.push('');
+	}
+	// then if there's a mismatch, add one on the right too.
+	if (rightElements.length < leftElements.length) {
+		rightElements.push('');
+	}
+
+
+	const handsPane = document.getElementById('hands');
+	// first, remove any extra rows. there should always be at least 1 row in leftElements, so we never remove the top row.
+	Array.from(handsPane.children).filter((_, idx) => idx >= leftElements.length).map(child => child.remove());
+	// then create new rows in case we had too few.
+	while(handsPane.children.length < leftElements.length) {
+		const row = document.createElement('tr');
+		row.innerHTML = '<td style="white-space:nowrap;padding-bottom:10px;width:25%;"></td><td style="white-space:nowrap;padding-bottom:10px;width:25%;"></td>';
+		handsPane.appendChild(row);
+	}
+	// now populate the interior of each cell
+	Array.from(handsPane.children).forEach((child, idx) => {
+		child.children[0].innerHTML = leftElements[idx];
+		// make room for the center pane in the first row.
+		child.children[idx === 0 ? 2 : 1].innerHTML = rightElements[idx];
+	})
+
 	document.getElementById('myhands').innerHTML = Object.keys(hands).filter(player => player === myName).map(player => 
 			`
 					${player}:<br/>
@@ -439,7 +481,7 @@ async function getState() {
 	}
 
 	// show deck (server only tells you the count, no peeking :D)
-	document.getElementById('deck').innerHTML = `Deck: <img src="cards/back.png" style="width:50px;"/> x${deckSize}`;
+	document.getElementById('deck').innerHTML = `x${deckSize}`;
 	// whole discard pile is publically visible.
 	document.getElementById('discard').innerHTML = discard.map(card => `<img src="cards/${card.n}${card.s}.png" style="width:50px;"/>`).join('');
 	// show messages
@@ -451,8 +493,9 @@ async function getState() {
 	// buttons stuff
 
 	// set the target buttons' enabled state based on if we're targeting a shoot or not
+	const aliveTargets = Object.keys(hands).map(name => `shoot_${name}`);
 	Array.from(document.getElementsByClassName('target_button')).forEach(button => {
-		button.disabled = clientState !== 'target' || button.id === `shoot_${myName}`;
+		button.disabled = clientState !== 'target' || button.id === `shoot_${myName}` || !aliveTargets.includes(button.id);
 	});
 
 	// multi select if you're replacing, even if someone else has to go first (disable submit button to keep you in turn).
