@@ -428,8 +428,9 @@ async function getState() {
 
 
 	const handsPane = document.getElementById('hands');
-	// this looks an edge bug but it shuffles the table rows when there's a rowspan in the middle sometimes
-	handsPane.style.display = playerList.length <= 1 ? 'inline' : (/Edg/.test(window.navigator.userAgent) ? null : 'initial');
+	// this should be 'initial' but there is a bug in some but not all chromium browsers where it doesnt work
+	// so instead special case out firefox
+	handsPane.style.display = playerList.length <= 1 ? 'inline' : (/firefox/i.test(window.navigator.userAgent) ? 'initial' : null);
 	// first, remove any extra rows. there should always be at least 1 row in leftElements, so we never remove the top row.
 	Array.from(handsPane.children).filter((_, idx) => idx >= leftElements.length).map(child => child.remove());
 	// then create new rows in case we had too few.
