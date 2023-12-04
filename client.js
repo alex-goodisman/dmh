@@ -301,6 +301,7 @@ async function getState() {
 
 	// show action buttons if the game is underway, even if it's not your turn. clientstate also has to be base (not picking parameters).
 	document.getElementById('handholder').style.display = ((myName in hands)) ? 'inline-block' : 'none';
+	document.getElementById('handholder').style['box-shadow'] = `${(activePlayer >= 0 && playerOrder[activePlayer] === myName) ? 'orange' : 'black'} 0px 0px 2px 2px`
 	document.getElementById('reveal').style.display = ((myName in hands) && playerOrder.length !== 0 && clientState === '' && turnPhase !== 'over') ? 'inline' : 'none';
 	document.getElementById('toss').style.display = ((myName in hands) && playerOrder.length !== 0 && clientState === '' && turnPhase !== 'over') ? 'inline' : 'none';
 	document.getElementById('shoot').style.display = ((myName in hands) && playerOrder.length !== 0 && clientState === '' && turnPhase !== 'over') ? 'inline' : 'none';
@@ -354,7 +355,6 @@ async function getState() {
 	// information section
 
 	// list players in turn order. dead players italic. active player bold.
-	document.getElementById('players').innerHTML = `Turn Order: [${playerOrder.map((player, idx) => player in hands ? idx === activePlayer ? `<b>${player}</b>` : player : `<i>${player}</i>`).join(', ')}]`;
 	// list players' hands.
 	// your hand you can see all of, cards face down will be italic parenthesized.
 	// other players card face down are unknown so its just a rectangle. (server doesn't even send them so if you're reading my code, you can't cheat)
@@ -372,16 +372,16 @@ async function getState() {
 	const tableOrder = startIdx === -1 ? playerList : [...playerList.slice(startIdx + 1), ...playerList.slice(0, startIdx)];
 	// build the display for each of them, keep in an array so we can arrange them in a sec
 	const tableElements = tableOrder.map(player =>
-		`<div style="box-shadow: black 0px 0px 2px 2px;padding: 10px;display: inline-block;text-align: center;">
-				<button id=shoot_${player} class=target_button disabled onclick=\"shootConfirm('${player}');\">${player}</button>:
+		`<button id=shoot_${player} class=target_button disabled onclick=\"shootConfirm('${player}');\" style="box-shadow: ${(activePlayer >= 0 && playerOrder[activePlayer] === player) ? 'orange' : 'black'} 0px 0px 2px 2px;padding: 10px;display: inline-block;text-align: center;">
+				${player}:
 			<br/>
-			${(hands[player] || []).map((info, idx) =>
+			${(hands[player] || []).map(info =>
 				`<div style="max-width:50px;height:70px;padding:0;display:inline-block">
 						${printCardInHand(info)}
 				</div>`
 				).join('')
 			}
-		</div>`
+		</button>`
 	);
 
 
