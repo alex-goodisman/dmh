@@ -510,8 +510,8 @@ async function getState() {
 	// 4 if anyone floated hearts this turn and hasnt yet replaced their cards, list them separately so they/others know they will have to replace a heart
 
 	// messages are different based on which phase it is, and whether the player in question is you.
-	let phaseMessage = '.';
-	let subMessage = '.';
+	let phaseMessage = '\u00A0';
+	let subMessage = '\u00A0';
 	switch(turnPhase) {
 	case 'action':
 		phaseMessage = playerOrder[activePlayer] === myName ? 'Choose an action...' : `${playerOrder[activePlayer]} is choosing an action...`;
@@ -562,8 +562,8 @@ async function getState() {
 	// show messages
 	document.getElementById('phase').childNodes[0].nodeValue = phaseMessage;
 	document.getElementById('subMessage').childNodes[0].nodeValue = subMessage;
-	document.getElementById('subSubMessage').childNodes[0].nodeValue = playersToReplace.length === 0 ? '.' : `Then ${playersToReplace.join(', ')} will replace their cards`;
-	document.getElementById('hearts').childNodes[0].nodeValue = replaceHearts.length === 0 ? '.' : `${replaceHearts.join(', ')} floated hearts, and will need to replace a heart`;
+	document.getElementById('subSubMessage').childNodes[0].nodeValue = playersToReplace.length === 0 ? '\u00A0' : `Then ${playersToReplace.join(', ')} will replace their cards`;
+	document.getElementById('hearts').childNodes[0].nodeValue = replaceHearts.length === 0 ? '\u00A0' : `${replaceHearts.join(', ')} floated hearts, and will need to replace a heart`;
 	
 	// buttons stuff
 
