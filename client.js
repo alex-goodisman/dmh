@@ -16,7 +16,7 @@ let failureCounter = 0;
 
 // hardcode the server so we can serve the client page from anywhere i.e. github pages
 // to use the server that served you the page, set this to `window.location.origin` in the browser console
-let server = 'https://157.230.52.255:8000';
+let server = 'https://24.60.30.214:8001';
 
 // unicode escapes for suits and the card symbol
 const symbols = {
